@@ -42,9 +42,10 @@ body <- dashboardBody(
                       accept = c(".xlsx", ".xls")),
             
             # Filters for categories A, B, and C ----
-            selectInput("state", "State:", choices = c("Option A1", "Option A2", "Option A3")),
-            selectInput("tag", "Tag", choices = c("Option B1", "Option B2", "Option B3")),
-            selectInput("theme", "Theme", choices = c("Climate Change", "Gender", "Equity")),
+            selectInput("name", "Name", choices = c("National", "State", "Local"), multiple = TRUE),
+            checkboxGroupInput("scale", "Scale", choices = c("Option A1", "Option A2", "Option A3")),
+            checkboxGroupInput("type", "Type", choices = c("Local", "Grassroots", "National Network", "Grassroots")),
+            checkboxGroupInput("constituancy", "Constituancy", choices = c("Youth", "Frontline", "General Public")),
             
             # Display filtered data ----
             DT::dataTableOutput("filteredData")

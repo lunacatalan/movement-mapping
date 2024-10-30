@@ -1,0 +1,17 @@
+```{r}
+library(tidyverse)
+```
+
+```{r}
+baseline_data <- data.frame(
+    Name = c("Option A1", "Option A2", "Option A3", "Option A1"),
+    Scale = c("Option A1", "Option A2", "Option A3", "Option A1"),
+    Type = c("Local", "Grassroots", "National Network", "Grassroots"),
+    Constituancy = c("Youth", "National", "Youth", "General Public")
+  )
+  
+
+baseline_data
+```
+
+
