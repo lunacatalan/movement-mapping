@@ -1,17 +1,35 @@
 ```{r}
 library(tidyverse)
+library(googlesheets4)
+
+key = "AIzaSyBrVF9THpvHRnS7yL1cOF_l0VR6A5LYSDA"
 ```
+
+# Hard code data
 
 ```{r}
-baseline_data <- data.frame(
-    Name = c("Option A1", "Option A2", "Option A3", "Option A1"),
-    Scale = c("Option A1", "Option A2", "Option A3", "Option A1"),
-    Type = c("Local", "Grassroots", "National Network", "Grassroots"),
-    Constituancy = c("Youth", "National", "Youth", "General Public")
+data_hard <- data.frame(
+    name = c("A", "B", "C 3", "D 1"),
+    contact = c("a@gmail.com", "b@gmail.com", "c@gmail.com", "d@gmail.com"),
+    theme = c("climate justice", "gender violance", "racial justice", "immigration justice"),
+    level = c("national", "state", "local", "state"),
+    geography = c("USA", "NY", "Brooklyn", "CA"),
+    toc = c("Fossil Finance", "National Lobbying", "State Lobbying", "Funder"),
+    constituency = c("Youth", "National", "Youth", "General Public"),
+    type = c("Local", "Grassroots", "National Network", "Grassroots")
   )
-  
 
-baseline_data
+data_hard
+
+ggplot(data_hard, aes(x = theme)) +
+  geom_bar(stat = "count") +
+        labs(title = "Filtered Data Plot", x = "X Axis", y = "Y Axis")
 ```
 
+
+
+# Access data with api
+```{r}
+data <- read_sheet("https://docs.google.com/spreadsheets/d/1eOCzKLtjFSE9RJHl3_B_OW8YMriDu2XMEYvQwksUbhM/edit?gid=1471250721#gid=1471250721")
+```
 

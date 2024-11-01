@@ -3,10 +3,14 @@ server <- function(input, output, session) {
   
   # Baseline data ----
   baseline_data <- data.frame(
-    Name = c("Option 1", "Option 2", "Option 3", "Option 1"),
-    Scale = c("Option A1", "Option A2", "Option A3", "Option A1"),
-    Type = c("Local", "Grassroots", "National Network", "Grassroots"),
-    Constituancy = c("Youth", "National", "Youth", "General Public")
+    name = c("test1", "test2", "test3", "test4"),
+    contact = c("a@gmail.com", "b@gmail.com", "c@gmail.com", "d@gmail.com"),
+    theme = c("climate justice", "gender violance", "racial justice", "immigration justice"),
+    level = c("national", "state", "local", "state"),
+    geography = c("USA", "NY", "Brooklyn", "CA"),
+    toc = c("Fossil Finance", "National Lobbying", "State Lobbying", "Funder"),
+    constituency = c("Youth", "National", "Youth", "General Public"),
+    type = c("Local", "Grassroots", "National Network", "Grassroots")
   )
   
   # Reactive for uploaded data ----
@@ -26,10 +30,11 @@ server <- function(input, output, session) {
   
   # Update filter options based on combined data ----
   observe({
-    updateSelectInput(session, "name", choices = unique(combined_data()$Name), selected = NULL)
-    updateCheckboxGroupInput(session, "scale", choices = unique(combined_data()$Scale), selected = NULL)
-    updateCheckboxGroupInput(session, "type", choices = unique(combined_data()$Type), selected = NULL)
-    updateCheckboxGroupInput(session, "constituancy", choices = unique(combined_data()$Constituancy), selected = NULL)
+    updateSelectInput(session, "name", choices = unique(combined_data()$name), selected = NULL)
+    updateCheckboxGroupInput(session, "level", choices = unique(combined_data()$level), selected = NULL)
+    updateCheckboxGroupInput(session, "type", choices = unique(combined_data()$type), selected = NULL)
+    updateCheckboxGroupInput(session, "toc", choices = unique(combined_data()$toc), selected = NULL)
+    updateCheckboxGroupInput(session, "constituency", choices = unique(combined_data()$constituency), selected = NULL)
   })
   
   # Reactive filtered data ----
@@ -37,16 +42,21 @@ server <- function(input, output, session) {
     data <- combined_data()
     
     if (!is.null(input$name) && length(input$name) > 0) {
-      data <- data %>% filter(Name %in% input$name)
+      data <- data %>% filter(name %in% input$name)
     }
-    if (!is.null(input$scale) && length(input$scale) > 0) {
-      data <- data %>% filter(Scale %in% input$scale)
+    if (!is.null(input$level) && length(input$level) > 0) {
+      data <- data %>% filter(level %in% input$level)
     }
     if (!is.null(input$type) && length(input$type) > 0) {
-      data <- data %>% filter(Type %in% input$type)
+      data <- data %>% filter(type %in% input$type)
     }
-    if (!is.null(input$constituancy) && length(input$constituancy) > 0) {
-      data <- data %>% filter(Constituancy %in% input$constituancy)
+    
+    if (!is.null(input$toc) && length(input$toc) > 0) {
+      data <- data %>% filter(toc %in% input$toc)
+    }
+    
+    if (!is.null(input$constituency) && length(input$constituency) > 0) {
+      data <- data %>% filter(constituency %in% input$constituency)
     }
     
     data
@@ -57,5 +67,28 @@ server <- function(input, output, session) {
     req(filteredData())
     filteredData()
   })
+  
+  # Generate plot on button click
+    output$filteredPlot <- renderPlot({
+      req(filteredData())
+      
+      # Example plot - Modify according to your data structure
+      ggplot(filteredData(), aes(x = theme)) +
+        geom_bar(stat = "count") +
+        labs(title = "Filtered Data Plot", x = "Theme", 
+             y = "Frequency") +
+        theme_classic()
+    })
+  
+  # Download handler for the filtered data
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste("filtered_data", Sys.Date(), ".csv", sep = "")
+    },
+    content = function(file) {
+      req(filteredData())
+      write.csv(filteredData(), file, row.names = FALSE)
+    }
+  )
   
 }
