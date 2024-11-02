@@ -8,8 +8,12 @@ library(fresh)
 library(tidyverse)
 
 library(bslib)
+library(thematic)
 
 source("setup.R")
+
+# change plots
+thematic_shiny()
 
 # Create custom theme
 mytheme <- create_theme(
@@ -30,31 +34,55 @@ mytheme <- create_theme(
 )
 
 # Define UI
-ui <- fluidPage(
+# ui <- fluidPage(
+#   
+#   # Set theme ----
+#   theme = fresh::use_theme(mytheme),
+#   
+#   titlePanel("Mapping the Movement"),
+#   
+#   sidebarLayout(
+#     sidebarPanel(
+#       sidebar_content
+#     ),
+#     
+#     mainPanel(
+#       
+#       # File upload button
+#       fileInput("file", "Upload Excel Sheet",
+#                 accept = c(".xlsx", ".xls")),
+#       
+#       # # Display filtered data
+#       DT::dataTableOutput("filteredData"),
+#       plotOutput("filteredPlot")
+#       
+#     )
+#   )
+
+ui <- page_sidebar(
   
   # Set theme ----
-  theme = fresh::use_theme(mytheme),
+  theme = bs_theme(bootswatch = "superhero"),
   
-  titlePanel("Mapping the Movement"),
+  title = "Mapping the Movement",
   
-  sidebarLayout(
-    sidebarPanel(
-      sidebar_content
-    ),
+  sidebar = sidebar(
     
-    mainPanel(
-      
-      # File upload button
-      fileInput("file", "Upload Excel Sheet",
-                accept = c(".xlsx", ".xls")),
-      
-      # # Display filtered data
-      DT::dataTableOutput("filteredData"),
-      plotOutput("filteredPlot")
-      
-    )
-  )
+    sidebar_content
+  ),
   
+  layout_columns(
+  # File upload button
+        card(fileInput("file", "Upload Excel Sheet",
+                  accept = c(".xlsx", ".xls")),
+
+        # Display filtered data
+        DT::dataTableOutput("filteredData")),
+  
+        #Output plots
+        card(plotOutput("filteredPlot"),
+        plotOutput("combinedPlot"))
+  )
   
 ) # END UI
 
@@ -119,19 +147,35 @@ server <- function(input, output, session) {
     data
   })
   
+  
   # Output the filtered data table
   output$filteredData <- DT::renderDataTable({
     req(filteredData())
     filteredData()
   })
   
+  # Output all data plot
+  output$combinedPlot <- renderPlot({
+    req(combined_data())
+    ggplot(combined_data(), 
+           aes(x = theme,
+               fill = level)) +
+      geom_bar(stat = "count") +
+      labs(title = "All Data Plot", 
+           x = "", 
+           y = "# of Organizations")
+  })
+  
   # Generate plot
   output$filteredPlot <- renderPlot({
     req(filteredData())
-    ggplot(filteredData(), aes(x = theme)) +
+    ggplot(filteredData(), 
+           aes(x = theme,
+               fill = level)) +
       geom_bar(stat = "count") +
-      labs(title = "Filtered Data Plot", x = "Theme", y = "Frequency") +
-      theme_classic()
+      labs(title = "Filtered Data Plot", 
+           x = "", 
+           y = "# of Organizations")
   })
   
   # Download handler for the filtered data
