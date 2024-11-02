@@ -14,5 +14,5 @@ sidebar_content <-
     checkboxGroupInput("constituency", "Constituency", 
                        choices = c("Youth", "Frontline", "General Public")),
     
-    "This app compares the effectiveness of two types of free trials at converting users into customers, A (30-days) and B (100-days)."
+    "This app allows users to find coalitions they want to work with!."
   )

@@ -1,10 +1,13 @@
 library(shiny)
 library(shinydashboard)
 library(DT)
-library(ggplot2)
 library(dplyr)
 library(readxl)
 library(fresh)
+
+library(tidyverse)
+
+library(bslib)
 
 source("setup.R")
 
@@ -29,69 +32,31 @@ mytheme <- create_theme(
 # Define UI
 ui <- fluidPage(
   
+  # Set theme ----
+  theme = fresh::use_theme(mytheme),
+  
   titlePanel("Mapping the Movement"),
+  
   sidebarLayout(
     sidebarPanel(
       sidebar_content
     ),
     
-    # Display filtered data
-    DT::dataTableOutput("filteredData"),
-    plotOutput("filteredPlot"),
-    
-    # File upload button
-    # fileInput("file", "Upload Excel Sheet",
-    #           accept = c(".xlsx", ".xls"))
+    mainPanel(
+      
+      # File upload button
+      fileInput("file", "Upload Excel Sheet",
+                accept = c(".xlsx", ".xls")),
+      
+      # # Display filtered data
+      DT::dataTableOutput("filteredData"),
+      plotOutput("filteredPlot")
+      
+    )
   )
   
   
 ) # END UI
-  
-  #dashboardPage(
-#   
-#   # Dashboard header
-#   dashboardHeader(
-#     title = "Movement Mapping",
-#     titleWidth = 400
-#   ),
-#   
-#   # Dashboard sidebar
-#   dashboardSidebar(
-#     sidebarMenu(
-#       menuItem(text = "Home", tabName = "home")
-#     )
-#   ),
-#   
-#   # Dashboard body
-#   dashboardBody(
-#     fresh::use_theme(mytheme),
-#     tabItems(
-#       
-#       # Welcome tabItem
-#       tabItem(tabName = "home",
-#               h2("Organizations"),
-#               
-#               # File upload button
-#               fileInput("file", "Upload Excel Sheet", 
-#                         accept = c(".xlsx", ".xls")),
-#               
-#               # Filters for categories A, B, and C
-#               checkboxGroupInput("level", "Level", choices = c("National", "State", "Local")),
-#               checkboxGroupInput("type", "Type", choices = c("Local", "Grassroots", "National Network", "Grassroots")),
-#               checkboxGroupInput("toc", "Theory of Change", choices = c("Fossil Finance", "National Lobbying", 
-#                                                                         "State Lobbying", "Funder")),
-#               checkboxGroupInput("constituency", "Constituency", choices = c("Youth", "Frontline", "General Public")),
-#               
-#               # Display filtered data
-#               DT::dataTableOutput("filteredData"),
-#               plotOutput("filteredPlot"),
-#               
-#               # Download button
-#               downloadButton("downloadData", "Download Filtered Data")
-#       )
-#     )
-#   )
-# )
 
 # Define server
 server <- function(input, output, session) {
@@ -136,13 +101,16 @@ server <- function(input, output, session) {
     data <- combined_data()
     
     if (!is.null(input$level) && length(input$level) > 0) {
-      data <- data %>% filter(level %in% input$level)
+      data <- data %>% 
+        filter(level %in% input$level)
     }
     if (!is.null(input$type) && length(input$type) > 0) {
-      data <- data %>% filter(type %in% input$type)
+      data <- data %>% 
+        filter(type %in% input$type)
     }
     if (!is.null(input$toc) && length(input$toc) > 0) {
-      data <- data %>% filter(toc %in% input$toc)
+      data <- data %>% 
+        filter(toc %in% input$toc)
     }
     if (!is.null(input$constituency) && length(input$constituency) > 0) {
       data <- data %>% filter(constituency %in% input$constituency)
