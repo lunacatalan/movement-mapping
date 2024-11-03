@@ -9,6 +9,7 @@ library(tidyverse)
 
 library(bslib)
 library(thematic)
+library(openxlsx)
 
 source("setup.R")
 
@@ -34,31 +35,6 @@ mytheme <- create_theme(
 )
 
 # Define UI
-# ui <- fluidPage(
-#   
-#   # Set theme ----
-#   theme = fresh::use_theme(mytheme),
-#   
-#   titlePanel("Mapping the Movement"),
-#   
-#   sidebarLayout(
-#     sidebarPanel(
-#       sidebar_content
-#     ),
-#     
-#     mainPanel(
-#       
-#       # File upload button
-#       fileInput("file", "Upload Excel Sheet",
-#                 accept = c(".xlsx", ".xls")),
-#       
-#       # # Display filtered data
-#       DT::dataTableOutput("filteredData"),
-#       plotOutput("filteredPlot")
-#       
-#     )
-#   )
-
 ui <- page_sidebar(
   
   # Set theme ----
@@ -72,16 +48,32 @@ ui <- page_sidebar(
   ),
   
   layout_columns(
-  # File upload button
-        card(fileInput("file", "Upload Excel Sheet",
-                  accept = c(".xlsx", ".xls")),
-
-        # Display filtered data
-        DT::dataTableOutput("filteredData")),
   
-        #Output plots
-        card(plotOutput("filteredPlot"),
-        plotOutput("combinedPlot"))
+        # Card 1: File upload button
+        card(
+        
+          # display all data
+          DT::dataTableOutput("combinedData")),
+  
+        #Card 2: Output plots
+        card(plotOutput("combinedPlot")),
+        
+        
+        # Card 4: filtered data
+        card(DT::dataTableOutput("filteredData"),
+             
+             # file output button 
+             downloadButton("filteredFile", label = "Download")),
+        
+        #Card 5: Output plots
+        card(plotOutput("filteredPlot")),
+        
+        # Card 3: Data upload button
+        card(fileInput("file", "Upload Excel Sheet",
+                       accept = c(".xlsx", ".xls"))),
+        
+        
+        col_widths = c(8, 4, 8, 4, 4)
   )
   
 ) # END UI
@@ -147,12 +139,31 @@ server <- function(input, output, session) {
     data
   })
   
-  
-  # Output the filtered data table
-  output$filteredData <- DT::renderDataTable({
-    req(filteredData())
-    filteredData()
+  # Render data table with row selection enabled
+  output$combinedData <- DT::renderDataTable({
+    DT::datatable(
+      combined_data(), 
+      selection = "multiple", 
+      options = list(pageLength = 5, autoWidth = TRUE)
+    )
   })
+  # Render data table with row selection enabled
+  output$filteredData <- DT::renderDataTable({
+    DT::datatable(
+      filteredData(), 
+      selection = "multiple", 
+      options = list(pageLength = 5, autoWidth = TRUE)
+    )
+  })
+  
+  output$filteredFile <- downloadHandler(
+    filename = function() {
+      paste("filtered_data", ".xlsx", sep = "")
+    },
+    content = function(file) {
+      openxlsx::write.xlsx(filteredData(), file)
+    }
+  )
   
   # Output all data plot
   output$combinedPlot <- renderPlot({
