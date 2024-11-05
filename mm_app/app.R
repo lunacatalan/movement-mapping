@@ -59,21 +59,21 @@ ui <- page_sidebar(
         card(plotOutput("combinedPlot")),
         
         
-        # Card 4: filtered data
-        card(DT::dataTableOutput("filteredData"),
-             
-             # file output button 
-             downloadButton("filteredFile", label = "Download")),
+        # Card 3: filtered data
+        card(DT::dataTableOutput("filteredData")),
         
-        #Card 5: Output plots
+        #Card 4: Output plots
         card(plotOutput("filteredPlot")),
         
-        # Card 3: Data upload button
+        # Card 5:file output button 
+        card(downloadButton("filteredFile", label = "Download Selected Organizations")),
+        
+        # Card 6: Data upload button
         card(fileInput("file", "Upload Excel Sheet",
                        accept = c(".xlsx", ".xls"))),
         
         
-        col_widths = c(8, 4, 8, 4, 4)
+        col_widths = c(8, 4, 8, 4, 4, 4)
   )
   
 ) # END UI
@@ -116,25 +116,29 @@ server <- function(input, output, session) {
     updateCheckboxGroupInput(session, "constituency", choices = unique(combined_data()$constituency), selected = NULL)
   })
   
-  # Reactive filtered data
+  # Reactive filtered data - rows that meet ANY of the conditions will be shown
   filteredData <- reactive({
     data <- combined_data()
+      
+    # Initialize an empty logical vector for OR filtering
+    filter_condition <- rep(FALSE, nrow(data))
     
+    # Update filter_condition based on each input
     if (!is.null(input$level) && length(input$level) > 0) {
-      data <- data %>% 
-        filter(level %in% input$level)
+      filter_condition <- filter_condition | (data$level %in% input$level)
     }
     if (!is.null(input$type) && length(input$type) > 0) {
-      data <- data %>% 
-        filter(type %in% input$type)
+      filter_condition <- filter_condition | (data$type %in% input$type)
     }
     if (!is.null(input$toc) && length(input$toc) > 0) {
-      data <- data %>% 
-        filter(toc %in% input$toc)
+      filter_condition <- filter_condition | (data$toc %in% input$toc)
     }
     if (!is.null(input$constituency) && length(input$constituency) > 0) {
-      data <- data %>% filter(constituency %in% input$constituency)
+      filter_condition <- filter_condition | (data$constituency %in% input$constituency)
     }
+    
+    # Apply the filter condition - only values with TRUE are shown
+    data <- data[filter_condition, ]
     
     data
   })
