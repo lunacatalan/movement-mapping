@@ -45,6 +45,8 @@ ui <- page_sidebar(
   sidebar = sidebar(
     
     sidebar_content
+    # selectizeInput("theme", "Theme",
+    #                choices = unique(combined_data$theme))
   ),
   
   layout_columns(
@@ -110,6 +112,7 @@ server <- function(input, output, session) {
   
   # Update filter options based on combined data
   observe({
+    updateSelectizeInput(session, "theme", choices = unique(combined_data()$theme), selected = NULL)
     updateCheckboxGroupInput(session, "level", choices = unique(combined_data()$level), selected = NULL)
     updateCheckboxGroupInput(session, "type", choices = unique(combined_data()$type), selected = NULL)
     updateCheckboxGroupInput(session, "toc", choices = unique(combined_data()$toc), selected = NULL)
@@ -124,6 +127,9 @@ server <- function(input, output, session) {
     filter_condition <- rep(FALSE, nrow(data))
     
     # Update filter_condition based on each input
+    if (!is.null(input$theme) && length(input$theme) > 0) {
+      filter_condition <- filter_condition | (data$theme %in% input$theme)
+    }
     if (!is.null(input$level) && length(input$level) > 0) {
       filter_condition <- filter_condition | (data$level %in% input$level)
     }

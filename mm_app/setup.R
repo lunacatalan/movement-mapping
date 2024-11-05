@@ -2,6 +2,11 @@
 
 sidebar_content <-
   list(
+  
+    # we can make this so that when the data frame is updated, a new list of the themes are included since this is hard coded and is not the best
+    # selectizeInput("theme", "Theme",
+    #                choices = unique(combined_data$theme)
+    
     # Filters for categories A, B, and C
     checkboxGroupInput("level", "Level", 
                        choices = c("National", "State", "Local")),
